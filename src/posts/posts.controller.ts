@@ -1,9 +1,15 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiProperty, ApiQuery, ApiResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ResponseDto } from 'src/_common/dto/response.dto';
+import { GetPostsDto } from './dto/get-posts.dto';
 import { PostsService } from './posts.service';
 
 @Controller('posts')
 @ApiTags('Posts')
+@ApiBadRequestResponse({ description: '잘못된 요청', type: ResponseDto })
+@ApiUnauthorizedResponse({ description: '권한 부족', type: ResponseDto })
+@ApiNotFoundResponse({ description: '리소스를 찾을 수 없음', type: ResponseDto })
+@ApiBearerAuth('accesskey')
 export class PostsController {
     constructor(private readonly postsService: PostsService) {}
     
@@ -12,14 +18,20 @@ export class PostsController {
         summary: '모든 게시글 조회',
         description: '모든 게시글을 불러온다.'
     })
-    async getPosts() {}
+    @ApiQuery({ type: GetPostsDto })
+    @ApiOkResponse({ description: 'Get all posts', type: ResponseDto })
+    async getPosts() {
+        return 'Get Posts'
+    }
     
     @Get(':id')
     @ApiOperation({
         summary: '하나의 게시글 조회',
         description: '하나의 게시글을 불러온다.'
     })
-    async getPostById() {}
+    async getPostById(
+        @Param('id') postId: number,
+    ) {}
     
     @Post()
     @ApiOperation({
@@ -27,7 +39,6 @@ export class PostsController {
         description: '게시글을 등록한다.'
     })
     async createPost(
-        @Param('user-id') userId: number,
         @Body('content') content: string
     ) {}
     
